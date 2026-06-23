@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuperDog 1</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4CAF50">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f0f4f8; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 15px; }
+        #app-container { background: white; width: 100%; max-width: 450px; height: 85vh; min-height: 550px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); overflow: hidden; position: relative; display: flex; flex-direction: column; }
+        
+        /* Screens */
+        .screen { display: none; width: 100%; height: 100%; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center; }
+        .screen.active { display: flex; }
+
+        /* Start Tab */
+        #start-screen h1 { color: #2c3e50; font-size: 2.5rem; margin-bottom: 10px; }
+        #start-screen p { color: #7f8c8d; margin-bottom: 30px; font-size: 1.1rem; }
+        .btn-start { background: #4CAF50; color: white; border: none; padding: 15px 40px; font-size: 1.3rem; font-weight: bold; border-radius: 50px; cursor: pointer; box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4); transition: transform 0.2s; }
+        .btn-start:active { transform: scale(0.95); }
+
+        /* Story Frames */
+        .frame-header { font-size: 1.2rem; font-weight: bold; color: #7f8c8d; margin-bottom: 10px; }
+        .image-container { flex: 1; width: 100%; max-height: 60%; display: flex; justify-content: center; align-items: center; overflow: hidden; border-radius: 12px; background: #eaeaea; }
+        .story-img { width: 100%; height: 100%; object-fit: contain; }
+        .text-container { padding: 15px 10px; min-height: 80px; display: flex; align-items: center; justify-content: center; }
+        .story-text { font-size: 1.1rem; color: #333; font-weight: 500; line-height: 1.4; }
+
+        /* Nav Controls */
+        .controls { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #fdfdfd; border-top: 1px solid #eee; }
+        .btn-nav { background: #2196F3; color: white; border: none; padding: 10px 25px; font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; }
+        .btn-nav:disabled { background: #b0bec5; cursor: not-allowed; }
+        .btn-home { background: #e0e0e0; color: #333; }
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        <!-- Tab 1: Start Screen -->
+        <div id="start-screen" class="screen active">
+            <h1>SuperDog 1</h1>
+            <p>The Greedy Dog Story</p>
+            <button class="btn-start" onclick="startStory()">START</button>
+        </div>
+
+        <!-- Tab 2: Story Loop Screen -->
+        <div id="story-screen" class="screen">
+            <div class="frame-header">Frame <span id="frame-number">1</span>/8</div>
+            <div class="image-container">
+                <img id="story-image" class="story-img" src="" alt="Story Frame">
+            </div>
+            <div class="text-container">
+                <p id="story-text" class="story-text"></p>
+            </div>
+            <div class="controls">
+                <button id="btn-prev" class="btn-nav btn-home" onclick="prevFrame()">Home</button>
+                <button id="btn-next" class="btn-nav" onclick="nextFrame()">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Global Audio Element -->
+    <audio id="story-audio"></audio>
+
+    <script>
+        const storyData = [
+            { img: "1.png", text: "Hey Peepal friend! Today I'll tell you the story of a greedy dog who lost his feast." },
+            { img: "2.png", text: "Once, a dog found a big, juicy bone on a butcher's shop counter and took it, very pleased with himself." },
+            { img: "3.png", text: "Carrying his prize, the dog decided to cross a bridge on his way home." },
+            { img: "4.png", text: "As he looked down, he saw another dog in the water with an even BIGGER bone! He didn't realize it was his reflection." },
+            { img: "5.png", text: "Greedily, he thought, 'I want that other bone! If I snap at him, I'll frighten him and get it!'" },
+            { img: "6.png", text: "Determined, he thought, 'I'll bark as loud as I can! Then I will have TWO bones!'" },
+            { img: "7.png", text: "The moment he opened his mouth, his own bone fell in with a splash. In trying to get two, he lost everything!" },
+            { img: "8.png", text: "Moral: Be content with what you have. Greed is self-destructive." }
+        ];
+
+        let currentFrame = 0;
+        const audioPlayer = document.getElementById('story-audio');
+
+        function startStory() {
+            document.getElementById('start-screen').classList.remove('active');
+            document.getElementById('story-screen').classList.add('active');
+            currentFrame = 0;
+            updateFrame();
+        }
+
+        function updateFrame() {
+            const data = storyData[currentFrame];
+            document.getElementById('frame-number').innerText = currentFrame + 1;
+            document.getElementById('story-image').src = data.img;
+            document.getElementById('story-text').innerText = data.text;
+
+            const prevBtn = document.getElementById('btn-prev');
+            const nextBtn = document.getElementById('btn-next');
+
+            if (currentFrame === 0) {
+                prevBtn.innerText = "Home";
+                prevBtn.className = "btn-nav btn-home";
+            } else {
+                prevBtn.innerText = "Back";
+                prevBtn.className = "btn-nav";
+            }
+
+            if (currentFrame === storyData.length - 1) {
+                nextBtn.innerText = "Finish";
+            } else {
+                nextBtn.innerText = "Next";
+            }
+
+            audioPlayer.src = `${currentFrame + 1}.mp3`;
+            audioPlayer.load();
+            audioPlayer.play().catch(e => console.log("Audio play blocked until interaction:", e));
+        }
+
+        function nextFrame() {
+            if (currentFrame < storyData.length - 1) {
+                currentFrame++;
+                updateFrame();
+            } else {
+                audioPlayer.pause();
+                document.getElementById('story-screen').classList.remove('active');
+                document.getElementById('start-screen').classList.add('active');
+            }
+        }
+
+        function prevFrame() {
+            if (currentFrame > 0) {
+                currentFrame--;
+                updateFrame();
+            } else {
+                audioPlayer.pause();
+                document.getElementById('story-screen').classList.remove('active');
+                document.getElementById('start-screen').classList.add('active');
+            }
+        }
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+            .then(() => console.log('Service Worker Registered'));
+        }
+    </script>
+</body>
+</html>
